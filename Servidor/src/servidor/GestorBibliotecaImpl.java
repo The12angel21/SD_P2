@@ -14,17 +14,19 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  *
  * @author Angel
  */
-public class GestorBibliotecaImpl implements GestorBibliotecaIntf{
+public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     private int IdAdmin = 14;
     private List<String> repositoriosCargados = new ArrayList<>();
-        private List<TLibro> libros = new ArrayList<>(); 
+    private List<TLibro> Biblioteca = new ArrayList<>();
     private int totalLibros = 0;
-    
+    private List<TDatosRepositorio> Repositorios = new ArrayList<>();
+
     @Override
     public int Conexion(String pPasswd) throws RemoteException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -47,53 +49,64 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf{
 
     @Override
     public int AbrirRepositorio(int pIda, String pNomFichero) throws RemoteException {
-       
-        int result;
+
+        int result = -2;
         int pruebaEnt = 0;
-        
-        if(IdAdmin == -1 /*|| pIda != IdAdmin*/){
+
+        if (IdAdmin == -1 /*|| pIda != IdAdmin*/) {
             result = -1;
-        }else if(repositoriosCargados.contains(pNomFichero)){
+        } else if (repositoriosCargados.contains(pNomFichero)) {
             result = -2;
-        }else{
-            try (DataInputStream dis = new DataInputStream(new FileInputStream(pNomFichero))){
-               
+        } else {
+            try (DataInputStream dis = new DataInputStream(new FileInputStream(pNomFichero))) {
                 int nLibros = dis.readInt();
-                
+
+                System.out.println("TOTAL LIBROS: " + nLibros);
                 totalLibros += nLibros;
-                
+
                 String nombreRepositorio = dis.readUTF();
                 String direccionRepositorio = dis.readUTF();
-                
-                for (int i = 0; i < nLibros; i++) {
-                String idioma = dis.readUTF(); // Leer el idioma
-                String isbn = dis.readUTF(); // Leer el ISBN
-                String pais = dis.readUTF(); // Leer el país
-                String titulo = dis.readUTF(); // Leer el título
-                String autor = dis.readUTF(); // Leer el autor
-                int noLibros = dis.readInt(); // Leer el número de copias
-                int noPrestados = dis.readInt(); // Leer el número de prestados
-                int noListaEspera = dis.readInt(); // Leer el número en lista de espera
-                int anio = dis.readInt(); // Leer el año
 
-                // Crear el objeto TLibro con la información leída
-                TLibro libro = new TLibro(idioma, isbn, pais, titulo, autor, noLibros, noPrestados, noListaEspera, anio);
-                libros.add(libro); // Agregar el libro a la lista
-                pruebaEnt+=1;
-            }
-                    repositoriosCargados.add(pNomFichero);
-                    result = 1;
-                
-                
-                } catch (FileNotFoundException fnf) {
+                TDatosRepositorio nuevoRepo = new TDatosRepositorio(nombreRepositorio, direccionRepositorio, nLibros);
+                Repositorios.add(nuevoRepo);
+
+                for (int i = 0; i < nLibros; i++) {
+                    int j = i + 1;
+                    System.out.println("");
+                    System.out.println("*****LIBRO " + j + " *****");
+                    String isbn = dis.readUTF();
+                    System.out.println("isbn: " + isbn);
+                    String titulo = dis.readUTF();
+                    System.out.println("titulo: " + titulo);
+                    String autor = dis.readUTF();
+                    System.out.println("autor: " + autor);
+                    int anio = dis.readInt();
+                    System.out.println("anio: " + anio);
+                    String pais = dis.readUTF();
+                    System.out.println("pais: " + pais);
+                    String idioma = dis.readUTF();
+                    System.out.println("Idioma: " + idioma);
+                    int noLibros = dis.readInt();
+                    System.out.println("noLibros: " + noLibros);
+                    int noPrestados = dis.readInt();
+                    System.out.println("noPrestados: " + noPrestados);
+                    int noListaEspera = dis.readInt();
+                    System.out.println("noListaEspera: " + noListaEspera);
+
+                    TLibro libro = new TLibro(idioma, isbn, pais, titulo, autor, noLibros, noPrestados, noListaEspera, anio);
+                    Biblioteca.add(libro); // Agregar el libro a la lista
+                }
+
+                dis.close();
+                repositoriosCargados.add(pNomFichero);
+                result = 1;
+
+            } catch (FileNotFoundException fnf) {
                 return 0; // Archivo no encontrado
             } catch (IOException e) {
                 throw new RemoteException("Error al cargar el repositorio: " + e.getMessage());
+            }
         }
-        }
-        System.out.println("PRUEBA 1:" + pruebaEnt);
-        System.out.println("RESULTADO: " + result);
-        System.out.println("TOTAL LIBROS: " + totalLibros);
         return result;
     }
 
@@ -104,7 +117,22 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf{
 
     @Override
     public int NuevoLibro(int pIda, TLibro L, int pRepo) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        int result = 3;
+
+        if (IdAdmin == -1 /*|| pIda != IdAdmin*/) {
+            result = -1;
+        } else if (pRepo > repositoriosCargados.size() || pRepo < 0) {
+            result = -2;
+        } else if (compararIsbn(L.getIsbn())) {
+            result = 0;
+        } else {
+            Biblioteca.add(L);
+            Repositorios.get(pRepo).aumentarNLibros();
+            result = 1;
+        }
+
+        return result;
     }
 
     @Override
@@ -146,5 +174,32 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf{
     public int Devolver(int pPos) throws RemoteException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+
+    @Override
+    public List<TDatosRepositorio> DevolverRepositorios() throws RemoteException {
+        return Repositorios;
+    }
     
+    @Override
+    public  List<TLibro> DevolverBiblioteca() throws RemoteException {
+        return Biblioteca;
+    }
+
+    private boolean compararIsbn(String isbn) {
+
+        boolean encontrado = false;
+
+        int i = 0;
+        do {
+            if (isbn.equals(Biblioteca.get(i))) {
+                encontrado = true;
+            } else {
+                i++;
+            }
+
+        } while (!encontrado && i < totalLibros);
+
+        return encontrado;
+    }
+
 }

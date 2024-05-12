@@ -4,11 +4,13 @@
  */
 package biblioteca;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Angel
  */
-public class TLibro {
+public class TLibro implements Serializable{
 
     String Idioma, Isbn;
     String Pais;
@@ -69,4 +71,78 @@ public class TLibro {
         System.out.println(String.format("%-5d%s%-18s%-4d%-4d%-4d", Pos + 1, T, Isbn, NoLibros, NoPrestados, NoListaEspera));
         System.out.println(String.format("     %s%s%-12d", A, PI, Anio));
     }
+
+    public String getIdioma() {
+        return Idioma;
+    }
+
+    public void setIdioma(String Idioma) {
+        this.Idioma = Idioma;
+    }
+
+    public String getIsbn() {
+        return Isbn;
+    }
+
+    public void setIsbn(String Isbn) {
+        this.Isbn = Isbn;
+    }
+
+    public String getPais() {
+        return Pais;
+    }
+
+    public void setPais(String Pais) {
+        this.Pais = Pais;
+    }
+
+    public String getTitulo() {
+        return Titulo;
+    }
+
+    public void setTitulo(String Titulo) {
+        this.Titulo = Titulo;
+    }
+
+    public String getAutor() {
+        return Autor;
+    }
+
+    public void setAutor(String Autor) {
+        this.Autor = Autor;
+    }
+
+    public int getNoLibros() {
+        return NoLibros;
+    }
+
+    public void setNoLibros(int NoLibros) {
+        this.NoLibros = NoLibros;
+    }
+
+    public int getNoPrestados() {
+        return NoPrestados;
+    }
+
+    public void setNoPrestados(int NoPrestados) {
+        this.NoPrestados = NoPrestados;
+    }
+
+    public int getNoListaEspera() {
+        return NoListaEspera;
+    }
+
+    public void setNoListaEspera(int NoListaEspera) {
+        this.NoListaEspera = NoListaEspera;
+    }
+
+    public int getAnio() {
+        return Anio;
+    }
+
+    public void setAnio(int Anio) {
+        this.Anio = Anio;
+    }
+    
+    
 }

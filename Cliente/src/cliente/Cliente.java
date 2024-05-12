@@ -6,7 +6,11 @@ package cliente;
 
 
 import biblioteca.GestorBibliotecaIntf;
+import biblioteca.TDatosRepositorio;
+import biblioteca.TLibro;
 import java.rmi.Naming;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -16,14 +20,16 @@ import java.util.Scanner;
  */
 public class Cliente {
 
+
     /**
      * @param args the command line arguments
      */
-    
    
     public static void main(String[] args) {
-        
+        List<TDatosRepositorio> Repositorios = new ArrayList<>();
+        List<TLibro> Biblioteca = new ArrayList<>();
         int result_int;
+        int idAdmin = -1;
          try {
              int Puerto = 0;
              String Host;
@@ -51,7 +57,7 @@ public class Cliente {
                             
                             switch(opc2){
                                 case 1:
-                                    System.out.println("\n**Cargar Repositorio**"); 
+                                    System.out.println("\n**CARGAR REPOSITORIO**"); 
                                     System.out.println("1.- Biblioteca.jdat_R1_");
                                     System.out.println("2.- Biblioteca.jdat_R2_");
                                     System.out.println("3.- Biblioteca.jdat_R3_");
@@ -63,11 +69,12 @@ public class Cliente {
                                      if (result_int == -1) {
                                             System.out.println("Error: El administrador no está autorizado.");
                                         } else if (result_int == -2) {
-                                            System.out.println("Error: El repositorio ya está cargado.");
+                                            System.out.println("Error: El repositorio ya esta cargado.");
                                         } else if (result_int == 0) {
                                             System.out.println("Error: El archivo no se pudo encontrar o abrir.");
                                         } else if (result_int == 1) {
-                                            System.out.println("El repositorio se cargó con éxito.");
+                                            Repositorios = biblio.DevolverRepositorios();
+                                            System.out.println("El repositorio se cargo con exito.");
                                         }
                                     
                                     break;
@@ -75,9 +82,47 @@ public class Cliente {
                                      System.out.println("\n**Guardar Repositorio**");
                                     break;
                                 case 3:
-                                    System.out.println("\n**Nuevo libro**");
-                                    //biblio.NuevoLibro(int, TLibro, int);
+                                    System.out.println("\n**NUEVO LIBRO**");
+                                    
+                                    String isbn, autor, titulo, pais, idioma;
+                                    int anio, nLibrosIni;
+                                           
+                                    System.out.println("Introduce el Isbn: ");
+                                    Teclado.nextLine();
+                                    isbn = Teclado.nextLine();
+                                    System.out.println("Introduce el Autor: ");
+                                    autor = Teclado.nextLine();
+                                    System.out.println("Introduce el Titulo: ");
+                                    titulo = Teclado.nextLine();
+                                    System.out.println("Introduce el anio: ");
+                                    anio = Teclado.nextInt();
+                                    System.out.println("Introduce el Pais: ");
+                                    Teclado.nextLine();
+                                    pais = Teclado.nextLine();
+                                    System.out.println("Introduce el Idioma: ");
+                                    idioma = Teclado.nextLine();
+                                    System.out.println("Introduce Numero de libros inicial: ");
+                                    nLibrosIni = Teclado.nextInt();
+                                    
+                                    MostrarRepositorios(Repositorios);
+                                    
+                                    System.out.println("Elige repositorio: ");
+                                    int repo = Teclado.nextInt();
+                                    
+                                    TLibro nuevoLibro =new TLibro(idioma, isbn, pais, titulo, autor, nLibrosIni, 0, 0, anio);
+                                    result_int = biblio.NuevoLibro(idAdmin, nuevoLibro, repo-1);
+                                    
+                                switch (result_int) {
+                                    case -1 -> System.err.println("Ya hay un usuario identificado como administrador o su idAdmin es incorrecto");
+                                    case -2 -> System.err.println("El repositorio cuya posicion se indica no existe");
+                                    case 0 -> System.err.println(" Hay un libro en algún repositorio de la biblioteca que tiene el mismo Isbn");
+                                    case 1 -> System.out.println("**Se ha añadido el nuevo libro al repositorio indicado**");
+
+                                }
+                                    
                                     break;
+
+
                                 case 4:
                                     System.out.println("\n**Comprar Libros**");
                                     break;
@@ -92,6 +137,16 @@ public class Cliente {
                                     break;
                                 case 8:
                                     System.out.println("\n**Listar Libros**");
+                                    Biblioteca = biblio.DevolverBiblioteca();
+                                    
+                                    for (int i = 0; i < Biblioteca.size(); i++) {
+                                        
+                                        if(i == 0){
+                                            Biblioteca.get(i).Mostrar(i, true);
+                                        }else{
+                                            Biblioteca.get(i).Mostrar(i, false);
+                                        }
+                                    }
                                     break;
                                 case 0:
                                     break;
@@ -169,5 +224,17 @@ public class Cliente {
             }while(!valido);
             
         return Salida;
+    }
+
+    private static void MostrarRepositorios(List<TDatosRepositorio> rep) {
+        
+         System.out.println("POS\tNOMBRE\t\t\tDIRECCION\t\tNº LIBROS");
+        System.out.println("**********************************************************************************************");
+        int j = 0;
+        for (int i = 0; i < rep.size() ; i++) {
+            j++;
+            System.out.println(j + "\t" + rep.get(i).getNombre() +"\t\t\t" + rep.get(i).getDireccion() +"\t\t" + rep.get(i).getnLibros());
+        }
+        
     }
 }

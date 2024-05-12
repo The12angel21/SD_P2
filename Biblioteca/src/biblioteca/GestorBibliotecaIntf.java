@@ -6,6 +6,7 @@ package biblioteca;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 /**
  *
@@ -35,5 +36,8 @@ public interface GestorBibliotecaIntf extends Remote {
     TLibro Descargar(int pIda, int pRepo, int pPos) throws RemoteException;
     int Prestar(int pPos) throws RemoteException;
     int Devolver(int pPos) throws RemoteException; 
+
+    public List<TDatosRepositorio> DevolverRepositorios()throws RemoteException;
+    public List<TLibro> DevolverBiblioteca()throws RemoteException;
    
 }
