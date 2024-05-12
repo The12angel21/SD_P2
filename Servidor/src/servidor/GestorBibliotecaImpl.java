@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  *
@@ -21,7 +22,7 @@ import java.util.List;
  */
 public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
-    private int IdAdmin = 14;
+    public int IdAdmin = 0;
     private List<String> repositoriosCargados = new ArrayList<>();
     private List<TLibro> Biblioteca = new ArrayList<>();
     private int totalLibros = 0;
@@ -29,7 +30,19 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     @Override
     public int Conexion(String pPasswd) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        
+        int result = Integer.parseInt(pPasswd);
+        
+            if(result == IdAdmin){
+                result = -1;
+            }else if(result != 1234){
+                result = -2;
+            }else{
+                Random r = new Random();
+                result = r.nextInt(1000000)+1;
+            }
+        
+        return result;
     }
 
     @Override
