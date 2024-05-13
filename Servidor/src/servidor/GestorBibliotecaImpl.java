@@ -22,7 +22,7 @@ import java.util.Random;
  */
 public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
-    public int IdAdmin = 0;
+    public int IdAdmin = -1;
     private List<String> repositoriosCargados = new ArrayList<>();
     private List<TLibro> Biblioteca = new ArrayList<>();
     private int totalLibros = 0;
@@ -30,43 +30,59 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     @Override
     public int Conexion(String pPasswd) throws RemoteException {
-        
+
         int result = Integer.parseInt(pPasswd);
-        
-            if(result == IdAdmin){
-                result = -1;
-            }else if(result != 1234){
-                result = -2;
-            }else{
-                Random r = new Random();
-                result = r.nextInt(1000000)+1;
-            }
-        
+
+        if (result == IdAdmin) {
+            result = -1;
+        } else if (result != 1234) {
+            result = -2;
+        } else {
+            Random r = new Random();
+            result = r.nextInt(1000000) + 1;
+            IdAdmin = result;
+        }
+
         return result;
     }
 
     @Override
     public boolean Desconexion(int pIda) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        boolean desconectar = false;
+        if (IdAdmin != -1 && pIda == IdAdmin) {
+            IdAdmin = -1;
+            desconectar = true;
+        }
+        return desconectar;
     }
 
     @Override
     public int NRepositorios(int pIda) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int result = -1;
+        if (pIda == IdAdmin && IdAdmin != -1) {
+            result = Repositorios.size();
+        }
+        return result;
     }
 
     @Override
     public TDatosRepositorio DatosRepositorio(int pIda, int pPosRepo) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        TDatosRepositorio Repositorio = new TDatosRepositorio();
+        if (pIda == IdAdmin) {
+            Repositorio = Repositorios.get(pPosRepo);
+        } else {
+            System.err.println("ERROR. El id de administrador no coincide");
+        }
+        return Repositorio;
     }
 
     @Override
     public int AbrirRepositorio(int pIda, String pNomFichero) throws RemoteException {
 
         int result = -2;
-        int pruebaEnt = 0;
 
-        if (IdAdmin == -1 /*|| pIda != IdAdmin*/) {
+        if (IdAdmin == -1 || pIda != IdAdmin) {
             result = -1;
         } else if (repositoriosCargados.contains(pNomFichero)) {
             result = -2;
@@ -150,12 +166,41 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     @Override
     public int Comprar(int pIda, String pIsbn, int pNoLibros) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        int result = -2;
+        int pos = Buscar(pIda, pIsbn);
+        if (pIda != IdAdmin) {
+            result = -1;
+        } else if (pos == -1) {
+            result = 0;
+        } else {
+            int librosN = Biblioteca.get(pos).getNoLibros();
+            Biblioteca.get(pos).setNoLibros(pNoLibros + librosN);
+            result = 1;
+        }
+
+        return pos;
     }
 
     @Override
     public int Retirar(int pIda, String pIsbn, int pNoLibros) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        int result = -2;
+
+        int pos = Buscar(pIda, pIsbn);
+        int librosN = Biblioteca.get(pos).getNoLibros();
+
+        if (pIda != IdAdmin) {
+            result = -1;
+        } else if (pos == -1) {
+            result = 0;
+        } else if (librosN - pNoLibros < 0) {
+            result = 2;
+        } else {
+            Biblioteca.get(pos).setNoLibros(librosN - pNoLibros);
+            result = 1;
+        }
+
+        return pos;
     }
 
     @Override
@@ -170,7 +215,33 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     @Override
     public int Buscar(int pIda, String pIsbn) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        int result = -3;
+        boolean encontrado = false;
+        int i = 0;
+        if (pIda != IdAdmin) {
+
+            result = -2;
+
+        } else {
+
+            do {
+                if (pIsbn.equals(Biblioteca.get(i).getIsbn())) {
+                    encontrado = true;
+                } else {
+                    i++;
+                }
+
+            } while (!encontrado && i < Biblioteca.size());
+        }
+
+        if (encontrado) {
+            result = i;
+        } else {
+            result = -1;
+        }
+
+        return result;
     }
 
     @Override
@@ -180,7 +251,20 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
 
     @Override
     public int Prestar(int pPos) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+
+        int result = 8;
+
+        if (pPos < 0 || pPos > Biblioteca.size()) {
+            result = -1;
+        } else if (Biblioteca.get(pPos).getNoPrestados() == Biblioteca.get(pPos).getNoLibros()) {
+            Biblioteca.get(pPos).aumentarPrestados();
+            result = 1;
+        } else {
+            Biblioteca.get(pPos).aumentarLibroEspera();
+            result = 0;
+        }
+
+        return result;
     }
 
     @Override
@@ -192,9 +276,9 @@ public class GestorBibliotecaImpl implements GestorBibliotecaIntf {
     public List<TDatosRepositorio> DevolverRepositorios() throws RemoteException {
         return Repositorios;
     }
-    
+
     @Override
-    public  List<TLibro> DevolverBiblioteca() throws RemoteException {
+    public List<TLibro> DevolverBiblioteca() throws RemoteException {
         return Biblioteca;
     }
 

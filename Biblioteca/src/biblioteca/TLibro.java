@@ -144,5 +144,11 @@ public class TLibro implements Serializable{
         this.Anio = Anio;
     }
     
+    public void aumentarPrestados(){
+        this.NoPrestados++;
+    }
+    public void aumentarLibroEspera(){
+        this.NoListaEspera++;
+    }
     
 }
