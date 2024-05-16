@@ -25,7 +25,8 @@ public class Cliente {
     public static void main(String[] args) {
         List<TDatosRepositorio> Repositorios = new ArrayList<>();
         List<TLibro> Biblioteca = new ArrayList<>();
-        int result_int;
+        int result_int = -5;
+        boolean result_bool = false;
         int idAdmin = -1;
         boolean logueado = false;
         try {
@@ -110,7 +111,8 @@ public class Cliente {
                                          nLibrosIni;
 
                                         System.out.println("Introduce el Isbn: ");
-                                        Teclado.nextLine();
+                                        Teclado = new Scanner(System.in);
+                                        //Teclado.nextLine();
                                         isbn = Teclado.nextLine();
                                         System.out.println("Introduce el Autor: ");
                                         autor = Teclado.nextLine();
@@ -171,9 +173,12 @@ public class Cliente {
                                                 result_int = biblio.Comprar(idAdmin, is, comp);
 
                                                 switch (result_int) {
-                                                    case -1 -> System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
-                                                    case 0 -> System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
-                                                    case 1 -> System.out.println("**COMPRA REALIZADA CON EXITO** Se han anadido " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
+                                                    case -1 ->
+                                                        System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
+                                                    case 0 ->
+                                                        System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
+                                                    case 1 ->
+                                                        System.out.println("**COMPRA REALIZADA CON EXITO** Se han anadido " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
                                                 }
                                             }
                                         }
@@ -202,10 +207,14 @@ public class Cliente {
                                                 result_int = biblio.Retirar(idAdmin, isb, comp);
 
                                                 switch (result_int) {
-                                                    case -1 -> System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
-                                                    case 0 -> System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
-                                                    case 1 -> System.out.println("**RETIRO REALIZADO CON EXITO** Se han eliminado " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
-                                                    case 2 -> System.out.println("No hay suficientes ejemplares disponibles para ser retirados");
+                                                    case -1 ->
+                                                        System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
+                                                    case 0 ->
+                                                        System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
+                                                    case 1 ->
+                                                        System.out.println("**RETIRO REALIZADO CON EXITO** Se han eliminado " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
+                                                    case 2 ->
+                                                        System.out.println("No hay suficientes ejemplares disponibles para ser retirados");
                                                 }
                                             }
                                         }
@@ -213,10 +222,54 @@ public class Cliente {
                                         break;
                                     case 6:
                                         System.out.println("\n**Ordenar Libros**");
+                                        System.out.println("Introduce el texto a Buscar: ");
+                                        System.out.println("Codigo de consulta");
+                                        System.out.println("0.-Por Isbn");
+                                        System.out.println("1.-Por Titulo");
+                                        System.out.println("2.-Por Autor");
+                                        System.out.println("3.-Por Año");
+                                        System.out.println("4.-Por Pais");
+                                        System.out.println("5.-Por Idioma");
+                                        System.out.println("6.-Por Nº de libros disponibles");
+                                        System.out.println("7.-Por Nº de libros prestados");
+                                        System.out.println("8.-Por Nº de libros en espera");
+
+                                        System.out.println("Introduce Codigo");
+                                        int codigo = Teclado.nextInt();
+
+                                        boolean ordena = biblio.Ordenar(idAdmin, codigo);
+                                        if (ordena) {
+                                            System.out.println("\n**Libros ordenados correctamente.**");
+                                        } else {
+                                            System.err.println("Error al ordenar los libros");
+                                        }
+
                                         break;
                                     case 7:
                                         System.out.println("\n**BUSCAR LIBROS**");
-
+                                        System.out.println("Introduce el texto a Buscar: ");
+                                        String campo = Teclado.nextLine();
+                                        System.out.println("Codigo de consulta");
+                                        System.out.println("I.-Por Isbn");
+                                        System.out.println("T.-Por Titulo");
+                                        System.out.println("A.-Por Autor");
+                                        System.out.println("P.-Por Pais");
+                                        System.out.println("D.-Por Idioma");
+                                        System.out.println("*.-Por todos los campos");
+                                        System.out.println("\nElige una opcion");
+                                        String opcionBuscar = Teclado.nextLine();
+                                        
+                                        List<TLibro> buscados = buscarLibro(Biblioteca, campo, opcionBuscar);
+                                        if(!buscados.isEmpty()) {
+                                            for(int i = 0; i<buscados.size(); i++) {
+                                                if(i==0)
+                                                    buscados.get(i).Mostrar(i, true);
+                                                else
+                                                    buscados.get(i).Mostrar(i, false);
+                                            }
+                                        }
+                                        
+                                        
                                         break;
                                     case 8:
                                         System.out.println("\n**LISTAR LIBROS**");
@@ -232,6 +285,7 @@ public class Cliente {
                                         }
                                         break;
                                     case 0:
+                                        biblio.Desconexion(idAdmin);
                                         break;
                                 }
                             } while (opc2 != 0 && logueado);
@@ -244,65 +298,65 @@ public class Cliente {
                     case 3:
                         System.out.println("\n**PRESTAMO DE LIBROS**");
 
-                                        System.out.println("Introduce el texto a Buscar: ");
-                                        System.out.println("Codigo de consulta");
-                                        System.out.println("I.-Por Isbn");
-                                        System.out.println("T.-Por Titulo");
-                                        System.out.println("A.-Por Autor");
-                                        System.out.println("P.-Por Pais");
-                                        System.out.println("D.-Por Idioma");
-                                        System.out.println("*.-Por todos los campos");
-                                       
-                                        System.out.println("Introduce Codigo");
-                                        String opcb = Teclado.nextLine();
+                        System.out.println("Introduce el texto a Buscar: ");
+                        System.out.println("Codigo de consulta");
+                        System.out.println("I.-Por Isbn");
+                        System.out.println("T.-Por Titulo");
+                        System.out.println("A.-Por Autor");
+                        System.out.println("P.-Por Pais");
+                        System.out.println("D.-Por Idioma");
+                        System.out.println("*.-Por todos los campos");
 
-                                       
-                                        
-                                        
-                                         System.out.println("Quieres sacar algun libro de la biblioteca (s/n)?");
-                                            String respuesta = Teclado.nextLine();
+                        System.out.println("Introduce Codigo");
+                        String opcb = Teclado.nextLine();
 
-                                            if (respuesta.equals("s")) {
-                                                System.out.println("Introduce Numero de libros comprados: ");
-                                                int comp = Teclado.nextInt();
-                                                result_int = biblio.Prestar(comp);
+                        System.out.println("Quieres sacar algun libro de la biblioteca (s/n)?");
+                        String respuesta = Teclado.nextLine();
 
-                                                switch (result_int) {
-                                                    case -1 -> System.err.println("ERROR.  La posición indicada no está dentro de los límites del repositorio mezclado y ordenado");
-                                                    case 0 -> System.out.println("Se ha puesto el usuario en la lista de espera");
-                                                    case 1 -> System.out.println("** Se ha prestado el libro el libro correctamente**");
+                        if (respuesta.equals("s")) {
+                            System.out.println("Introduce Numero de libros comprados: ");
+                            int comp = Teclado.nextInt();
+                            result_int = biblio.Prestar(comp);
 
-                                                }
-                                            }
-                                        
-                                        
-                                        
-                                        
+                            switch (result_int) {
+                                case -1 ->
+                                    System.err.println("ERROR.  La posición indicada no está dentro de los límites del repositorio mezclado y ordenado");
+                                case 0 ->
+                                    System.out.println("Se ha puesto el usuario en la lista de espera");
+                                case 1 ->
+                                    System.out.println("** Se ha prestado el libro el libro correctamente**");
 
-                                        if (result_int == -2) {
-                                            System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el almacenado en servidor");
-                                        } else if (result_int == -1) {
-                                            System.err.println("ERROR. No se ha encontrado ningun libro con el ISBN indicado por parametro");
-                                        } else {
-                                            Biblioteca.get(result_int).Mostrar(result_int, true);
-                                            System.out.println("Es este el libro que deseas comprar mas unidades (s/n)?");
-                                            String respuesta = Teclado.nextLine();
+                            }
+                        }
 
-                                            if (respuesta.equals("s")) {
-                                                System.out.println("Introduce Numero de libros comprados: ");
-                                                int comp = Teclado.nextInt();
-                                                result_int = biblio.Retirar(idAdmin, isb, comp);
+                        if (result_int == -2) {
+                            System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el almacenado en servidor");
+                        } else if (result_int == -1) {
+                            System.err.println("ERROR. No se ha encontrado ningun libro con el ISBN indicado por parametro");
+                        } else {
+                            Biblioteca.get(result_int).Mostrar(result_int, true);
+                            System.out.println("Es este el libro que deseas comprar mas unidades (s/n)?");
+                            respuesta = Teclado.nextLine();
 
-                                                switch (result_int) {
-                                                    case -1 -> System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
-                                                    case 0 -> System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
-                                                    case 1 -> System.out.println("**RETIRO REALIZADO CON EXITO** Se han eliminado " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
-                                                    case 2 -> System.out.println("No hay suficientes ejemplares disponibles para ser retirados");
-                                                }
-                                            }
-                                        }
+                            if (respuesta.equals("s")) {
+                                System.out.println("Introduce Numero de libros comprados: ");
+                                int comp = Teclado.nextInt();
+                                //result_int = biblio.Retirar(idAdmin, isb, comp);
 
-                                        break;
+                                switch (result_int) {
+                                    case -1 ->
+                                        System.err.println("ERROR. Ya hay un usuario identificado como administrador o el id no coincide con el alamcenado en el Servidor");
+                                    case 0 ->
+                                        System.err.println("ERROR. No se ha encontrado ningun libro con el isbn indicado por parametro");
+                                    case 1 ->
+                                        System.out.println("**RETIRO REALIZADO CON EXITO** Se han eliminado " + comp + " libros a " + Biblioteca.get(result_int).getTitulo());
+                                    case 2 ->
+                                        System.out.println("No hay suficientes ejemplares disponibles para ser retirados");
+                                }
+                            }
+                        }
+
+                        break;
                     case 4:
                         System.out.println("\n**Devolucion de libros**");
                         break;
@@ -382,6 +436,57 @@ public class Cliente {
             System.out.println(j + "\t" + rep.get(i).getNombre() + "\t\t\t" + rep.get(i).getDireccion() + "\t\t" + rep.get(i).getnLibros());
         }
 
+    }
+
+    private static List<TLibro> buscarLibro(List<TLibro> libros, String campo, String codigo) {
+        List<TLibro> librosBuscados = new ArrayList<>();
+
+        switch (codigo) {
+            case "I" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getIsbn().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+            }
+            case "T" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getTitulo().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+            }
+            case "A" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getAutor().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+            }
+            case "P" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getPais().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+            }
+            case "D" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getIdioma().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+
+            }
+            case "*" -> {
+                for (TLibro libro : libros) {
+                    if (libro.getIsbn().contains(campo) || libro.getTitulo().contains(campo) || libro.getAutor().contains(campo) || libro.getPais().contains(campo) || libro.getIdioma().contains(campo)) {
+                        librosBuscados.add(libro);
+                    }
+                }
+            }
+        }
+        return librosBuscados;
     }
 
 }
